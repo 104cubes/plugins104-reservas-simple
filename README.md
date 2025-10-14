@@ -154,4 +154,4 @@ Si necesitas que este sistema se adapte mejor a tu negocio (idioma, número de f
 ##  Más plugins útiles
 
 Descubre otros plugins ligeros en  
-👉 [https://104cubes.com/plugins104](https://104cubes.com/category/plugins-104/)
+👉 [https://104cubes.com/plugins-104]([https://104cubes.com/category/plugins-104/](https://104cubes.com/plugins-104/))
