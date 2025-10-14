@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Simple Reservations
-Description: Plugin para gestionar reservas con Stripe y notificaciones por WhatsApp.
+Description: Plugin para gestionar reservas con notificaciones por WhatsApp.
 Version: 1.0
 Author: Luis
 */
@@ -67,7 +67,7 @@ function sr_save_reservation()
         exit;
     }
 
-    $allowed_methods = ['stripe', 'cash', 'bizum'];
+    $allowed_methods = ['manual', 'cash', 'bizum'];
     if (!in_array($payment_method, $allowed_methods)) {
         wp_redirect(add_query_arg('form-error', urlencode('Método de pago no válido.'), wp_get_referer()));
         exit;
@@ -83,9 +83,10 @@ function sr_save_reservation()
         'phone' => $phone,
         'payment_method' => $payment_method,
         'total_price' => $total_price, // Calcular si es necesario
-        'status' => $payment_method === 'stripe' ? 'pending_payment' : 'pending'
+        'status' => $payment_method === 'manual' ? 'pending_payment' : 'pending'
     ]);
-    wp_mail("a.salgueirocarrera@gmail.com", "Nueva reserva pendiente", "Detalles: \nFecha:" . $datetime . "\nNombre:" . $full_name . "\nAdultos:" . $adults ."\nNiños:" . $children . "\nTeléfono:" . $phone);
+    // wp_mail(...) removido por privacidad. Añade envío de 
+    // email al administrador cuando se crea una reserva.
     wp_redirect(add_query_arg('success', 'true', wp_get_referer()));
     exit;
 }
@@ -94,105 +95,17 @@ register_activation_hook(__FILE__, 'sr_create_reservations_table');
 function sr_enqueue_scripts()
 {
     if (is_page()) { // Asegurarse de que solo cargue en páginas
-        wp_enqueue_script('stripe-js', 'https://js.stripe.com/v3/', [], null, true);
-
-        // Tu archivo personalizado
-        wp_enqueue_script(
-            'custom-stripe-js',
-            plugin_dir_url(__FILE__) . 'js/Stripe.js',
-            ['stripe-js'], // Dependencia
-            null,
-            true
-        );
+       
 
         // Localizar ajaxurl
-        wp_localize_script('custom-stripe-js', 'sr_vars', [
-            'ajaxurl' => admin_url('admin-ajax.php'),
-        ]);
+       
         wp_enqueue_script('update-hidden-js', plugin_dir_url(__FILE__) . 'js/update-hidden.js', [], null, true);
         wp_enqueue_script('calculate-price-js', plugin_dir_url(__FILE__) . 'js/calculate-price.js', [], null, true);
     }
 }
 add_action('wp_enqueue_scripts', 'sr_enqueue_scripts');
 
-function sr_create_payment_intent()
-{
-    $referer = wp_get_referer(); // Obtén la URL del referer
-    $base_url = $referer ? strtok($referer, '?') : home_url(); // Elimina la parte del query string
 
-    if (!isset($_POST['amount'])) {
-        wp_send_json_error('El monto es obligatorio.', 400);
-        
-    }
-
-    \Stripe\Stripe::setApiKey('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'); // Reemplaza con tu clave secreta de Stripe
-
-    try {
-        $paymentIntent = \Stripe\PaymentIntent::create([
-            'amount' => intval($_POST['amount']), // Monto en centavos (por ejemplo, 10 € -> 1000)
-            'currency' => 'eur',
-            'payment_method_types' => ['card'],
-            'capture_method' => 'manual', // IMPORTANTE: Esto permite la captura manual
-        ]);
-
-        wp_send_json_success(['client_secret' => $paymentIntent->client_secret]);
-        wp_redirect(add_query_arg('success', 'true', $base_url) . '#success-message');
-        exit;
-    } catch (\Stripe\Exception\ApiErrorException $e) {
-        wp_send_json_error($e->getMessage(), 500);
-        wp_redirect(add_query_arg('form_error', urlencode('Error al procesar el pago'), $base_url) . '#error-message');
-        exit;
-    }
-}
-
-add_action('wp_ajax_sr_create_payment_intent', 'sr_create_payment_intent');
-add_action('wp_ajax_nopriv_sr_create_payment_intent', 'sr_create_payment_intent');
-function sr_confirm_reservation()
-{
-    global $wpdb;
-
-    $reservation_id = intval($_GET['id']);
-    $table_name = $wpdb->prefix . 'reservations';
-
-    // Recuperar la reserva
-    $reservation = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE id = %d", $reservation_id));
-    if (!$reservation) {
-        wp_die('Reserva no encontrada.');
-    }
-
-    // Configurar Stripe
-    try {
-        \Stripe\Stripe::setApiKey('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'); // Reemplaza con tu clave secreta
-
-        // Recuperar el PaymentIntent
-        $paymentIntent = \Stripe\PaymentIntent::retrieve($reservation->payment_intent_id);
-
-        // Registrar el estado actual del PaymentIntent
-        error_log('Estado antes de capturar: ' . $paymentIntent->status);
-
-        // Intentar capturar
-        $capturedPaymentIntent = $paymentIntent->capture();
-
-        // Registrar el estado después de capturar
-        error_log('Estado después de capturar: ' . $capturedPaymentIntent->status);
-
-        if ($capturedPaymentIntent->status === 'succeeded') {
-            // Actualizar la base de datos
-            $wpdb->update(
-                $table_name,
-                ['status' => 'confirmed'],
-                ['id' => $reservation_id]
-            );
-
-            wp_redirect(admin_url('admin.php?page=sr_reservations&success=true'));
-            exit;
-        } else {
-            wp_die('Error: El PaymentIntent no se pudo capturar correctamente.');
-        }
-    } catch (\Stripe\Exception\ApiErrorException $e) {
-        wp_die('Error al capturar el pago: ' . $e->getMessage());
-    }
-}
 add_action('admin_post_sr_confirm_reservation', 'sr_confirm_reservation');
 
 function sr_enqueue_admin_styles() {
