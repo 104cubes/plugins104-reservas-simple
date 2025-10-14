@@ -85,7 +85,7 @@ function sr_save_reservation()
         'total_price' => $total_price, // Calcular si es necesario
         'status' => $payment_method === 'manual' ? 'pending_payment' : 'pending'
     ]);
-    // wp_mail(...) removido por privacidad. Añade envío de 
+    // ***  wp_mail(...) removido por privacidad. Añade envío de *** //
     // email al administrador cuando se crea una reserva.
     wp_redirect(add_query_arg('success', 'true', wp_get_referer()));
     exit;
