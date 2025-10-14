@@ -1,7 +1,8 @@
 <?php 
 function sr_send_whatsapp_meta($to, $template, $reservation) {
+    // ** Por si quieres automatizar más con la api de Whatsapp ** 
     $url = "https://graph.facebook.com/v21.0/466446299894041/messages";
-    $access_token = "EAARZBtgFQ0YkBOZBwrr1sNjEn71in8YC4xi7RPDZATd67A9zFRooQ4vcjdDneq7abMtgVcdhN39GYTDalpxC0Daqz69n4OdV0HcwzmMaKhrEMnI4JX6d6GDKJo426BG7RE4yQkykYZACpo6p45MAMJKJa824kepr0Q5ndUJZAZC7mTXSMWeZAYSbfpZAUyZAD93NdV2HsQ5QUgZBkJDsf5Utsbm8BpKi2Lpspph24ZD";
+    $access_token = "";
     $parameters = [
         [
             "type" => "text",
