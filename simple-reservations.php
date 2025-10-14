@@ -3,7 +3,7 @@
 Plugin Name: Simple Reservations
 Description: Plugin para gestionar reservas con notificaciones por WhatsApp.
 Version: 1.0
-Author: Luis
+Author: 104 CUBES
 */
 
 // Evitar acceso directo
