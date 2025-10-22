@@ -1,157 +1,131 @@
-# plugins104-reservas-simple
+# plugins104-popup-oferta
 
-**Solución sencilla para el cliente y el visitante:**  
-Muestra un calendario semanal navegable, con los días y franjas horarias disponibles claramente marcados, y permite realizar reservas introduciendo el nombre y el número de teléfono del visitante.
+**Muestra un popup de imagen promocional solo cuando el visitante ha aceptado cookies y hace scroll.**  
+Ideal para destacar ofertas, campañas estacionales o redirigir a una página clave de tu web.
 
 ---
 
 ## ¿Qué hace este plugin?
 
-- Muestra un **calendario semanal** en frontend, con franjas horarias por día (ej. 10–12h, 12–14h)
-- Permite a los usuarios **reservar una franja** sin necesidad de registrarse ni pagar
-- Las reservas se almacenan en el panel de administración
+- Muestra una imagen promocional como **popup animado** al hacer scroll.
+- Se muestra **solo una vez por sesión**, respetando al usuario.
+- Compatible con el plugin **Complianz**: solo aparece si se han aceptado las cookies.
 - El administrador puede:
-  - Ver las reservas pendientes
-  - Contactar directamente vía WhatsApp con un clic
-  - **Anular días o semanas completas** desde el mismo calendario (modo admin)
-  - Marcar reservas como atendidas o eliminarlas
+  - Seleccionar la imagen desde la biblioteca de medios.
+  - Activar o desactivar el popup desde el panel.
+  - Introducir una URL de destino para redirigir al hacer clic en la imagen.
+- El visitante puede:
+  - Cerrar el popup con un botón `×` o haciendo clic fuera.
+  - Ser redirigido a la página configurada si hace clic en la imagen.
 
 ---
 
-##  ¿Para quién está pensado?
+## ¿Para quién está pensado?
 
 Ideal para:
-- Granjas educativas
-- Pequeños negocios rurales
-- Talleres presenciales
-- Visitas guiadas
-- Cualquier negocio que necesite **reservas por franja horaria**, sin complicarse
+
+- Ecommerces con campañas activas (ej. rebajas, Black Friday…)
+- Webs informativas que quieren destacar un post o contenido concreto
+- Negocios locales que quieren mostrar una promoción simple sin banners intrusivos
+- Cualquier sitio WordPress que necesite un **Call To Action eficaz, ligero y sin complicaciones**
 
 ---
 
-##  Filosofía
+## Filosofía
 
-Este plugin nace de una necesidad real: permitir reservas de forma directa y humana, sin intermediarios ni sistemas complejos.  
-No usa WooCommerce, ni pasarelas de pago, ni configuraciones infinitas.
+Este plugin está diseñado para ser **ligero, útil y respetuoso** con el visitante:
 
--  100% libre y sin suscripciones
--  Ligero para tu WordPress
--  Código abierto y entendible
--  Se puede adaptar fácilmente a otras necesidades
+- No rastrea nada
+- Respeta la privacidad (no se ejecuta sin consentimiento)
+- No requiere configuraciones complejas
+- Es **autocontenible y sin dependencias externas**
 
----
-
-##  Instalación
-
-1. Sube la carpeta del plugin a `/wp-content/plugins/plugins104-reservas-simple/`
-2. Actívalo desde el panel de administración
-3. Inserta el shortcode `[reservas_simple]` en la página donde quieras mostrar el calendario
-4. ¡Listo!
-
->  Opcional: puedes personalizar las franjas horarias, los textos y los estilos desde el código o pedirnos una adaptación.
+Forma parte de la colección [Plugins104](https://104cubes.com/plugins-104), pensada para dar soluciones específicas, sin hinchar tu WordPress.
 
 ---
 
-##  Shortcodes disponibles
+## Instalación
 
-```shortcode
-[reservas_simple]
-```
-
-- Muestra el calendario semanal y el formulario de reserva
-
----
-
-##  Estructura del código y puntos clave
-
-¿Quieres personalizarlo tú mismo? Aquí te dejamos los archivos principales y ejemplos de modificación:
+1. Sube la carpeta del plugin a `/wp-content/plugins/plugins104-popup-oferta/`  
+   o instala el archivo `.zip` desde el panel de WordPress.
+2. Actívalo.
+3. Accede al menú **"Popup Oferta"** en el panel de administración.
+4. Sube una imagen y activa el popup.
+5. (Opcional) Introduce una URL para redirigir cuando se haga clic en la imagen.
+6. ¡Listo!
 
 ---
 
-### `includes/shortcode.php`
-Responsable de **mostrar el calendario** y gestionar el formulario de reservas en el frontend.
+## Personalización
 
-####  Modificar franjas horarias:
-Busca este fragmento:
+Este plugin funciona bien tal como viene, pero puedes personalizar fácilmente:
+
+### Enlace clicable
+Desde el panel puedes introducir cualquier URL (landing, post, producto…) para redirigir al hacer clic en la imagen.
+
+### Altura del popup
+Por defecto se limita a un `90vh` (90% del alto del navegador). Puedes cambiarlo en el CSS.
+
+### Animación de entrada
+Usa una animación tipo *bounce*. Puedes cambiarla en `assets/style.css`.
+
+---
+
+## Código clave
+
+### Mostrar la imagen:
+
 ```php
-$slots = ['10:00 - 12:00', '12:00 - 14:00'];
+<img id="popup-oferta-img" src="" alt="Oferta" />
 ```
-Puedes cambiarlo por cualquier otra combinación, por ejemplo:
+
+### Con enlace clicable:
+
 ```php
-$slots = ['09:00 - 11:00', '11:00 - 13:00', '16:00 - 18:00'];
+<a id="popup-oferta-link" href="#" target="_blank" rel="noopener">
+  <img id="popup-oferta-img" src="" alt="Oferta" />
+</a>
 ```
 
-####  Modificar la duración del calendario (cuántas semanas se pueden avanzar):
-```php
-$weeks_to_show = 6;
+### Detectar cookies aceptadas (Complianz):
+
+```js
+if (typeof cmplz_has_consent === 'function' && cmplz_has_consent()) {
+    // Mostrar el popup
+}
 ```
 
 ---
 
-### `includes/admin-panel.php`
-Controla la **vista de administración** en el backend.
+## Capturas
 
-####  Botón de WhatsApp por reserva:
-Busca esta línea:
-```php
-<a href='https://wa.me/$telefono?text=Hola...' ...
-```
-Aquí puedes personalizar el mensaje que se le envía al cliente desde WhatsApp.
+> *(Puedes añadir capturas si lo subes al repo o directorio de WordPress)*
 
-####  Anular días desde el calendario (modo admin):
-Busca las funciones que procesan `POST` con `bloquear_fecha` o `desbloquear_fecha`. Aquí puedes adaptar los textos o lógica de bloqueo.
+- Panel de administración del plugin
+- Popup mostrado en frontend
+- Animación de entrada
+- Comportamiento tras aceptar cookies
 
 ---
 
-### `includes/notifications.php`
-Contiene la lógica para **enviar correos al admin** cuando entra una nueva reserva.
+## Licencia
 
-####  Cambiar asunto o contenido del email:
-```php
-$subject = "Nueva reserva en la web";
-$message = "Hay una nueva reserva para el día $fecha de $slot.";
-```
-Puedes añadir más datos como `$telefono` o personalizar el mensaje completo.
-
----
-
-### `js` y `css`
-El JavaScript y el CSS están bastante contenidos:
-
-- `js/calendar.js`: controla la navegación por semanas
-- `css/style.css`: puedes personalizar colores y apariencia del calendario
-
----
-
-##  Capturas
-
-> *(Incluye capturas en la sección de imágenes del repo si lo deseas)*
-
-- Calendario en frontend
-- Formulario de reserva
-- Vista de reservas en admin
-- Botón WhatsApp por reserva
-- Calendario en modo admin (bloquear días)
-
----
-
-##  Licencia
-
-Este plugin se publica bajo licencia MIT. Puedes usarlo, adaptarlo y redistribuirlo libremente.  
+Este plugin se publica bajo licencia MIT.  
+Puedes usarlo, adaptarlo y redistribuirlo libremente.  
 Solo te pedimos que conserves la referencia al proyecto original si haces modificaciones públicas.
 
 ---
 
-##  ¿Quieres adaptarlo?
+## ¿Quieres adaptarlo?
 
-Si necesitas que este sistema se adapte mejor a tu negocio (idioma, número de franjas, colores, campos…),  
-**te lo personalizamos desde 59 €, sin cuotas ni suscripciones**.
+¿Necesitas que el popup incluya un botón con texto, un formulario o se muestre en momentos distintos?
 
- [Contacta](https://104cubes.com/contacto)
+**Lo personalizamos desde 49 €, sin cuotas ni suscripciones.**  
+👉 [Contacta con nosotros](https://104cubes.com/contacto)
 
 ---
 
-##  Más plugins útiles
+## Más plugins útiles
 
 Descubre otros plugins ligeros en  
-👉 [https://104cubes.com/plugins-104]([https://104cubes.com/category/plugins-104/](https://104cubes.com/plugins-104/)
+👉 [https://104cubes.com/plugins-104](https://104cubes.com/plugins-104)
